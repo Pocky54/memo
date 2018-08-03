@@ -1,115 +1,119 @@
 import math
 import csv
-def inputcsv():
 
-    x1 = -24535.8113
-    y1 = -98492.4011
-    x2 = -19815.1020
-    y2 = -103196.3511
+#---------------------------------------------------
+# Point Class 
+# --------------------------------------------------
+# parm :
+#      x : 
+#      y :
+# function:
+#
+#
+class Point(object):
+    def __init__(self, x, y):
+        self.X = float(x)
+        self.Y = float(y)
 
-    with open('allroads.csv', newline = '') as f :
+    def EuclideanDistance(self, point):
+        try:
+            return math.sqrt(math.pow(self.X-point.X, 2) + math.pow(self.Y-point.Y, 2))
+        except:
+            print('Euclid Distance : Type Error.')
     
-        dataReader = csv.reader(f)
-        array = []
+    def toString(self):
+        return 'X is ' + str(self.X) + ' Y is ' + str(self.Y)
+
+class QuadPoint(object):
+    def __init__(self, left, top, right, bot):
+        self.Left = left
+        self.Top = top
+        self.Right = right
+        self.Bot = bot
+
+    def isXRange(self, x):
+        return self.Left < x and x < self.Right
+
+    def isYRange(self, y):
+        return self.Bot < y and y < self.Top
+    
+    def isRange(self, point):
+        try:
+            return self.isXRange(point.X) and self.isYRange(point.Y)
+        except:
+            print('QuadPoint isRange function error.')
+    
+class Shelter(object):
+    def __init__(self, name, x, y):
+        self.Name = name
+        self.Point = Point(float(x),float(y))
+        self.NearPoint = Point(0,0)
+
+    def EuclideanDistance(self, point):
+        try:
+            return self.Point.EuclideanDistance(point)
+        except:
+            print('Euclid Distance : Type Error.')
+
+    def isNearRoad(self, point, threshold):
         
-        for row in dataReader:
-            if jouken(x1,y1,x2,y2,float(row[0]),float(row[1])) or jouken(x1,y1,x2,y2,float(row[2]),float(row[3])):
-                   array.append(row) 
-        print(array[0])
-        print(array[-1])
-        print(len(array))
+        if threshold >= self.EuclideanDistance(point):
+            self.NearPoint = point
+            return self.EuclideanDistance(point) 
+        else:
+            return threshold
+        
 
-        with open('hinanjo.csv', newline = '') as f1 :
-            dataReader1 = csv.reader(f1)
-            array1 = []
-            print("避難所名" + "            " + "避難所x座標" + "           " + "避難所y座標" + "           " + "道路x座標" + "         " + "道路y座標")
-            for hinanjo in dataReader1 :
-                w = 10000
-                x = 0
-                y = 0
-                for road in array :
-                    if w >= pythagorean(float(hinanjo[3]),float(hinanjo[4]),float(road[1]),float(road[0])):
-                            w = pythagorean(float(hinanjo[3]),float(hinanjo[4]),float(road[1]),float(road[0]))
-                            x = float(road[1])
-                            y = float(road[0])
-            
-                    if w >= pythagorean(float(hinanjo[3]),float(hinanjo[4]),float(road[3]),float(road[2])):
-                            w = pythagorean(float(hinanjo[3]),float(hinanjo[4]),float(road[3]),float(road[2]))
-                            x = float(road[3])
-                            y = float(road[2])
+    def toString(self):
+        return self.Name +   ':' + self.Point.toString() + self.NearPoint.toString()
 
-                print(str(hinanjo[0]) + "       " +str(hinanjo[3]) + "      " + str(hinanjo[4]) + "     " + str(x) + "      " +str(y))
-           
+#-------------------------------------------------------------
+# Main class
+#-------------------------------------------------------------
+# author Konnami
+#
 
-def jouken(x1,y1,x2,y2,a,b):
-    if a > x1 and a < x2 and b < y1 and b > y2:
-        return True
-    else:
-        return False
+def roadCSV(path):
+    with open(path,newline='') as f:
+        dataReader = csv.reader(f)
+        return list(dataReader)
 
-def pythagorean(x1,y1,x2,y2):
-    return math.sqrt(math.pow(x1-x2,2)+math.pow(y1-y2,2))
+def inRangePoint(datas):
+    array = []
+    for data in datas:
+        if quadPoint.isRange(Point(data[0], data[1])) or quadPoint.isRange(Point(data[2], data[3])):
+            array.append(data)
+    return array
 
-inputcsv()
+if __name__ == '__main__':
+    
+    hinanjos = []
 
+    threshold = 10000.000
 
-"""
-['-20515.9896755658', '-101280.04983435', '-20515.8541883246', '-101219.961315295', '0']
-['-20366.9190709064', '-102154.089569922', '-20257.7491742906', '-102213.102102737', '1.04']
-10200
-避難所名            避難所x座標           避難所y座標           道路x座標         道路y座標
-明治小学校       -98616.3274      -23864.4115     -98616.8250382159      -23815.787607078
-明治コミュニティセンター       -98516.9152      -23658.7763     -98532.4205104184      -23664.4489272789
-伝馬小学校       -98754.1897      -23059.0272     -98710.5462397763      -23053.10879776
-明豊中学校       -98813.3047      -22932.3756     -98746.8934605949      -22935.8526755469
-伝馬コミュニティセンター       -98377.4162      -23164.4475     -98450.5169653439      -23156.1226058031
-豊田小学校       -99213.0484      -23260.2032     -99196.2477566369      -23274.237059027
-豊田コミュニティセンター       -99346.6173      -23083.8694     -99352.0802159562      -23066.1294564835
-道徳小学校       -99525.3492      -23679.5455     -99527.8620598737      -23737.6832751629
-大江中学校       -99479.3922      -23563.4633     -99472.054720227      -23510.7979053722
-交流センター道徳       -99662.0052      -23641.885     -99668.7736566319      -23584.2294539756
-道徳保育園       -99948.2355      -23589.7512     -99930.4490068632      -23562.119101536
-呼続小学校       -98969.9797      -21323.1563     -98944.9588114257      -21294.6062675354
-新郊中学校       -98953.11      -21420.8402     -98926.582881293      -21471.879946463
-呼続コミュニティセンター       -99002.749      -21539.4658     -98987.8177033749      -21556.7275260464
-大磯小学校       -99407.9199      -21983.3039     -99389.9649485121      -21941.6533214294
-大磯コミュニティセンター       -99234.5271      -22077.0554     -99234.2654038196      -22105.3460650851
-桜小学校       -99022.8847      -20557.6229     -99004.8605006751      -20574.6611398128
-桜田中学校       -99059.1054      -20186.1331     -99032.4305738089      -20231.7827550812
-桜コミュニティセンター       -99013.6055      -20589.3257     -99004.8605006751      -20574.6611398128
-菊住小学校       -98235.6156      -20841.6954     -98422.9253312856      -20778.4113276902
-月日教おうかんみち協会本部       -98341.3166      -20161.658     -98448.2462640473      -20202.0011845244
-菊住コミュニティセンター       -98292.6093      -20658.6994     -98422.9253312856      -20778.4113276902
-春日野小学校       -99586.8815      -20745.2432     -99512.8622040015      -20771.7871770943
-桜台高等学校       -99393.8943      -20681.261     -99373.4053615041      -20712.2208057509
-春日野コミュニティセンター       -99319.4423      -20882.3805     -99306.4873271826      -20870.4411881406
-笠寺小学校       -100927.9044      -21145.6665     -100962.372296765      -21185.3466651052
-本城中学校       -100434.7907      -21296.9632     -100459.110787434      -21342.5676137045
-県立名南工業高等学校       -101299.9411      -20773.5008     -101247.067400004      -20795.1212383633
-笠寺コミュニティセンター       -100169.819      -21230.2424     -100184.859178947      -21210.343219221
-星崎小学校       -102165.4555      -21479.2996     -102165.255862252      -21504.9928104653
-星崎学区公民館       -101621.9702      -21160.9594     -101661.284813684      -21171.0187280593
-星崎コミュニティセンター       -102185.3119      -21052.6576     -102179.307463845      -21025.1982984379
-笠東小学校       -100131.5029      -20278.5028     -100106.499863796      -20293.424989928
-笠東コミュニティセンター       -100135.2339      -20787.3404     -100135.883477897      -20795.9997381778
-大生小学校       -100438.4729      -22752.5789     -100453.738179441      -22809.1139082931
-大生ふれあいセンター       -100617.7562      -22966.3814     -100608.558137618      -23004.363047106
-県立名古屋南高等学校       -100317.6974      -22338.2566     -100224.841952784      -22283.2354442689
-南生涯学習センター       -100185.6832      -22249.7683     -100143.563020978      -22253.4098585991
-日本ガイシスポーツプラザ       -100321.7085      -22149.8103     -100407.147049259      -22205.0557927823
-宝小学校       -101116.3602      -22848.7405     -101141.359883306      -22875.7956248241
-宝コミュニティセンター       -101027.605      -22984.4681     -101037.677745215      -22933.6540569823
-宝南小学校       -101422.4516      -22525.804     -101435.162503346      -22571.1106239164
-南光中学校       -101163.4506      -21971.595     -101139.894798429      -21960.6901860579
-宝南コミュニティセンター       -101503.5214      -22264.3934     -101481.221682793      -22258.9617519136
-白水小学校       -102392.6332      -23068.5359     -102362.107752717      -23053.2477437737
-大同大学大同高等学校       -101954.4346      -23379.2034     -101985.840236254      -23426.119567899
-白水コミュニティセンター       -102342.5881      -23118.0185     -102328.696303663      -23105.5917558186
-千鳥小学校       -102689.9504      -22574.5435     -102683.941439229      -22630.0582581101
-名南中学校       -102906.9306      -22664.7315     -102931.738391045      -22611.2972519237
-千鳥コミュニティセンター       -102896.4387      -22059.3226     -102882.196198392      -22075.4578090534
-特別養護老人ホームはるかぜ       -102492.0507      -22122.0872     -102455.816585777      -22163.3256771825
-柴田小学校       -102567.4868      -23833.114     -102547.580487991      -23827.9828913727
-つどいの館和光       -102857.3325      -23755.8071     -102838.215593445      -23771.3987927271
-大同大学石井記念体育館       -102144.1217      -23724.3975     -102117.3128001      -23707.9706069867
-"""
+    left = -24535.8113
+    top = -98492.4011
+    right = -19815.1020
+    bot = -103196.3511
+
+    quadPoint = QuadPoint(left,top,right,bot)
+
+    allRoads = roadCSV('allroads.csv')
+    array = inRangePoint(allRoads) #Bad variable Name
+
+    # Task :
+    #   - Cast Input Data to Point Class 
+    #   - Refactoring
+    for i in roadCSV('hinanjo.csv'):
+        shelter = Shelter(i[0],float(i[3]),float(i[4]))
+        hinanjos.append(shelter)
+    point = Point(0,0)
+    for shelter in hinanjos:
+        threshold =  100000
+        point = Point(0,0)
+        for road in array:
+            p1 = Point(road[1], road[0])
+            threshold =  shelter.isNearRoad(p1, threshold)
+
+        print(shelter.toString())
+                
